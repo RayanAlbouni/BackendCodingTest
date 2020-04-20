@@ -21,7 +21,7 @@ namespace XUnitTestProject
         }
 
         [Fact]
-        public void RegisterUser_Returns_OK()
+        public void RegisterUser_Returns_Success()
         {
             //Arrange
             var username = string.Format("TestUser_{0}", DateTime.Now.ToString("yyyyMMddHHmmss"));
@@ -29,28 +29,37 @@ namespace XUnitTestProject
 
             // Act
             var okResult = _controller.register(user).Result;
-
+            var okObjectResult = okResult as OkObjectResult;
+            var val = okObjectResult.Value as ResultDTO;
+            
             // Assert
-            Assert.IsType<OkResult>(okResult);
+            Assert.IsType<OkObjectResult>(okResult);
+            Assert.IsType<ResultDTO>(okObjectResult.Value);
+            Assert.Equal("Success", val.Status);
+
         }
 
         [Fact]
-        public void RegisterUser_Returns_Badrequest()
+        public void RegisterUser_Returns_Error()
         {
             //Arrange
             var username = string.Format("TestUser");
             var user = new UserDTO(username);
 
             // Act
-            var badrequestResult = _controller.register(user).Result as BadRequestObjectResult;
-            
+            var okResult = _controller.register(user).Result;
+            var okObjectResult = okResult as OkObjectResult;
+            var val = okObjectResult.Value as ResultDTO;
+
             // Assert
-            Assert.IsType<BadRequestObjectResult>(badrequestResult);
-            Assert.Equal("Username Already Exist", badrequestResult.Value.ToString());
+            Assert.IsType<OkObjectResult>(okResult);
+            Assert.IsType<ResultDTO>(okObjectResult.Value);
+            Assert.Equal("Error", val.Status);
+            Assert.Equal("User Already Exist", val.Data);
         }
 
         [Fact]
-        public void ReportUserScore_Returns_OK()
+        public void ReportUserScore_Returns_Success()
         {
             //Arrange
             var username = string.Format("TestUser_20200420033913");
@@ -58,51 +67,62 @@ namespace XUnitTestProject
 
             // Act
             var okResult = _controller.report(userscore).Result;
+            var okObjectResult = okResult as OkObjectResult;
+            var val = okObjectResult.Value as ResultDTO;
 
             // Assert
-            Assert.IsType<OkResult>(okResult);
+            Assert.IsType<OkObjectResult>(okResult);
+            Assert.IsType<ResultDTO>(okObjectResult.Value);
+            Assert.Equal("Success", val.Status);
         }
 
         [Fact]
-        public void ReportUserScore_Returns_Badrequest()
+        public void ReportUserScore_Returns_Error()
         {
             //Arrange
             var username = string.Format("Not_Exist_User_#$&");
             var userscore = new UserScoreDTO(username, 10);
-            
+
             // Act
-            var badrequestResult = _controller.report(userscore).Result as BadRequestObjectResult;
+            var okResult = _controller.report(userscore).Result;
+            var okObjectResult = okResult as OkObjectResult;
+            var val = okObjectResult.Value as ResultDTO;
 
             // Assert
-            Assert.IsType<BadRequestObjectResult>(badrequestResult);
-            Assert.Equal("Username Not Exist", badrequestResult.Value.ToString());
-
+            Assert.IsType<OkObjectResult>(okResult);
+            Assert.IsType<ResultDTO>(okObjectResult.Value);
+            Assert.Equal("Error", val.Status);
+            Assert.Equal("Username Not Exist", val.Data);
         }
 
         [Fact]
-        public void GetLeaderboard_Returns_OK()
+        public void GetLeaderboard_Returns_Success()
         {
             // Act
-            var okObjectResult = _controller.GetLeaderboard(null).Result as OkObjectResult;
+            var okResult = _controller.GetLeaderboard(null).Result;
+            var okObjectResult = okResult as OkObjectResult;
+            var val = okObjectResult.Value as ResultDTO;
 
             // Assert
-            Assert.IsType<OkObjectResult>(okObjectResult);
-            Assert.NotNull(okObjectResult);
-            var result = okObjectResult.Value as List<UserScoreDTO>;
-            Assert.NotNull(result);
+            Assert.IsType<OkObjectResult>(okResult);
+            Assert.IsType<ResultDTO>(okObjectResult.Value);
+            Assert.IsType<List<UserScoreDTO>>(val.Data);
+            Assert.Equal("Success", val.Status);
         }
 
         [Fact]
-        public void GetLeaderboard_Top10_Returns_OK()
+        public void GetLeaderboard_Top10_Returns_Success()
         {
             // Act 
-            var okObjectResult = _controller.GetLeaderboard(10).Result as OkObjectResult;
+            var okResult = _controller.GetLeaderboard(10).Result;
+            var okObjectResult = okResult as OkObjectResult;
+            var val = okObjectResult.Value as ResultDTO;
 
             // Assert
-            Assert.IsType<OkObjectResult>(okObjectResult);
-            Assert.NotNull(okObjectResult);
-            var result = okObjectResult.Value as List<UserScoreDTO>;
-            Assert.NotNull(result);
+            Assert.IsType<OkObjectResult>(okResult);
+            Assert.IsType<ResultDTO>(okObjectResult.Value);
+            Assert.IsType<List<UserScoreDTO>>(val.Data);
+            Assert.Equal("Success", val.Status);
         }
     }
 }

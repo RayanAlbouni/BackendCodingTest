@@ -1,19 +1,18 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using DatabaseManager.Data;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
 using SharedContract.DTO;
 
 namespace BackendCodingTest.Controllers
 {
-    //[Route("api/[action]")]
     [ApiController]
+    [Authorize]
     public class APIController : ControllerBase
     {
         UserManager userManager;
+
         public APIController(GameContext context)
         {
             userManager = new UserManager(context);
@@ -23,15 +22,13 @@ namespace BackendCodingTest.Controllers
         /// Register a new user that can report a score
         /// POST: api/register
         /// </summary>
-        /// <param name="username"></param>
+        /// <param name="request"></param>
         [HttpPost]
         [Route("api/register")]
         public async Task<IActionResult> register(UserDTO request)
         {
-            if (await userManager.IsUserExistAsync(request.UserName))
-                return BadRequest("Username Already Exist");
-            await userManager.RegisterUserAsync(request.UserName);
-            return Ok();
+            var result = await userManager.RegisterUserAsync(request.UserName);
+            return Ok(result);
         }
 
 
@@ -39,31 +36,36 @@ namespace BackendCodingTest.Controllers
         /// Store game result for specified user
         /// POST: api/report
         /// </summary>
-        /// <param name="username"></param>
-        /// <param name="score"></param>
+        /// <param name="request"></param>
         [HttpPost]
+        [Route("api/report")]
         public async Task<IActionResult> report(UserScoreDTO request)
         {
-            if (!await userManager.IsUserExistAsync(request.UserName))
-                return BadRequest("Username Not Exist");
-            await userManager.AddUserScoreAsync(request.UserName, request.Score);
-            return Ok();
+            var result = await userManager.AddUserScoreAsync(request.UserName, request.Score);
+            return Ok(result);
         }
 
 
-        // GET: api/API
         /// <summary>
-        /// 
+        /// Returns a list of users sorted by their highest score value
+        /// Get: api/getleaderboard
         /// </summary>
-        /// <param name="top_users">Optional</param>
-        /// <returns></returns>
+        /// <param name="top_users"></param>
         [HttpGet]
-        [Route("/Getleaderboard")]
-        [Route("/Getleaderboard/{top_users}")]
+        [Route("api/getleaderboard")]
+        [Route("api/getleaderboard/{top_users}")]
         public async Task<IActionResult> GetLeaderboard(int? top_users)
         {
             var result = await userManager.GetLeaderboardAsync(top_users);
             return Ok(result);
+        }
+
+        [AllowAnonymous]
+        [HttpGet]
+        [Route("api/IsAlive")]
+        public IActionResult IsAlive()
+        {
+            return Ok(string.Format("You have reached the server successfully, the local time:{0}", DateTime.Now));
         }
 
     }
